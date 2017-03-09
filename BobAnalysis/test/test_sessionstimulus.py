@@ -16,8 +16,6 @@ def test_session_stimulus_c_data():
     brain_observatory_nwb_data_set = brain_observatory_cache.get_ophys_experiment_data(oeid)
     SessionStimulus(brain_observatory_nwb_data_set=brain_observatory_nwb_data_set)
 
-
-
 if __name__ == "__main__":
 
     test_session_stimulus_c_oeid() # pragma: no cover
