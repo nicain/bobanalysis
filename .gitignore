@@ -1,3 +1,5 @@
+BobAnalysis/cache/ophys_experiment_data/
+BobAnalysis/cache/*.json
 .idea
 htmlcov
 *.egg-info
