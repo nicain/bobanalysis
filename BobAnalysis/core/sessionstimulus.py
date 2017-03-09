@@ -9,17 +9,32 @@ import pandas as pd
 
 class SessionStimulus(object):
 
-    def __init__(self, oeid, brain_observatory_cache=None):
-        self.oeid = oeid
-        self.initialize(brain_observatory_cache=brain_observatory_cache)
+    def __init__(self, **kwargs):
 
-    def initialize(self, brain_observatory_cache=None):
+        if 'oeid' in kwargs:
+            self.oeid = kwargs['oeid']
 
-        if brain_observatory_cache is None:
-            brain_observatory_cache = BrainObservatoryCache(manifest_file=os.path.join(cache_location, 'boc_manifest.json'))
+            if 'brain_observatory_cache' in kwargs:
+                brain_observatory_cache = kwargs['brain_observatory_cache']
+            else:
+                if 'manifest_file' in kwargs:
+                    manifest_file = kwargs['manifest_file']
+                else:
+                    manifest_file = os.path.join(cache_location, 'boc_manifest.json')
+
+                brain_observatory_cache = BrainObservatoryCache(manifest_file=manifest_file)
 
 
-        self.data = brain_observatory_cache.get_ophys_experiment_data(self.oeid)
+
+            self.data = brain_observatory_cache.get_ophys_experiment_data(self.oeid)
+
+        elif 'brain_observatory_nwb_data_set' in kwargs:
+
+            self.data = kwargs['brain_observatory_nwb_data_set']
+            self.oeid = self.data.get_metadata()['ophys_experiment_id']
+
+        else:
+            raise RuntimeError('Construction not recognized')
 
         self.session_type = self.data.get_session_type()
         self.stimuli = self.data.list_stimuli()
@@ -37,7 +52,6 @@ class SessionStimulus(object):
         for stimulus in self.stimuli:
 
             self.stimulus_table_dict[stimulus] = self.data.get_stimulus_table(stimulus)
-
 
             if stimulus == 'spontaneous':
                 self.stimulus_template_dict[stimulus] = np.full((1,16,28), 127, dtype=np.int8)
@@ -135,4 +149,4 @@ class SessionStimulus(object):
 
 if __name__ == "__main__":
 
-    S = SessionStimulus(530646083)
+    S = SessionStimulus(oeid=530646083)
