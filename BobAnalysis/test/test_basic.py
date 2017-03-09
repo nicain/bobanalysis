@@ -4,7 +4,7 @@ def test_basic():
     import sys
     import os
     sys.path.append(os.path.join(sys.path[0],'../..'))
-    import template_package as tp
+    import BobAnalysis as tp
     reload(tp)
     
 if __name__ == '__main__':                                    # pragma: no cover

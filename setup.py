@@ -4,7 +4,7 @@ import io
 import os
 import sys
 
-import template_package as package
+import BobAnalysis as package
 
 here = os.path.abspath(os.path.dirname(__file__))
 package_name = package.__name__
