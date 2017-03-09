@@ -24,10 +24,8 @@ class SessionStimulus(object):
         self.session_type = self.data.get_session_type()
         self.stimuli = self.data.list_stimuli()
         self.csid_list = self.data.get_cell_specimen_ids()
-        self.timestamps, self.traces = self.data.get_dff_traces()
+        self.timestamps = self.data.get_fluorescence_timestamps()
         self.number_of_acquisition_frames = len(self.timestamps)
-        self.number_of_cells = self.traces.shape[0]
-        self.roi_mask_array = self.data.get_roi_mask_array()
 
         self.initialize_template_and_table_dicts()
         self.initialize_stimulus_lookup_dict()
