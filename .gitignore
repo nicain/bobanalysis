@@ -1,5 +1,6 @@
 BobAnalysis/cache/ophys_experiment_data/
-BobAnalysis/cache/*.json
+BobAnalysis/cache/boc_manifest.json
+BobAnalysis/cache/ophys_experiments.json
 .idea
 htmlcov
 *.egg-info
