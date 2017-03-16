@@ -6,6 +6,7 @@ from BobAnalysis.core.utilities import get_sparse_noise_epoch_mask_list
 from BobAnalysis.core.signature import session_signature_df_dict
 import os
 import pandas as pd
+# import time
 
 class SessionStimulus(object):
 
@@ -24,8 +25,6 @@ class SessionStimulus(object):
 
                 brain_observatory_cache = BrainObservatoryCache(manifest_file=manifest_file)
 
-
-
             self.data = brain_observatory_cache.get_ophys_experiment_data(self.oeid)
 
         elif 'brain_observatory_nwb_data_set' in kwargs:
@@ -38,12 +37,12 @@ class SessionStimulus(object):
 
         self.session_type = self.data.get_session_type()
         self.stimuli = self.data.list_stimuli()
-        self.csid_list = self.data.get_cell_specimen_ids()
         self.timestamps = self.data.get_fluorescence_timestamps()
         self.number_of_acquisition_frames = len(self.timestamps)
 
         self.initialize_template_and_table_dicts()
         self.initialize_stimulus_lookup_dict()
+        self.initialize_interval_df()
 
     def initialize_template_and_table_dicts(self):
 
@@ -59,9 +58,16 @@ class SessionStimulus(object):
             else:
                 self.stimulus_template_dict[stimulus] = self.data.get_stimulus_template(stimulus)
 
-    def initialize_stimulus_lookup_dict(self):
+    def initialize_interval_df(self):
+        self.interval_df = self.get_interval_df(path=os.path.join(cache_location, str(self.oeid), 'interval_df.csv'))
 
-        self.stimulus_lookup_dict = self.get_stimulus_lookup_dict(path=os.path.join(cache_location, 'SessionStimulus_%s.json' % self.oeid))
+    @cacheable(query_strategy='lazy', writer=lambda p, x : x.to_csv(p), reader=pd.DataFrame.from_csv)
+    def get_interval_df(self):
+        self.get_stimulus_lookup_dict(query_strategy='create')
+        return self.interval_df
+
+    def initialize_stimulus_lookup_dict(self):
+        self.stimulus_lookup_dict = self.get_stimulus_lookup_dict(path=os.path.join(cache_location, str(self.oeid), 'session_stimulus.json'))
 
     @cacheable(query_strategy='lazy', **Cache.cache_json())
     def get_stimulus_lookup_dict(self):
@@ -73,11 +79,11 @@ class SessionStimulus(object):
                     stimulus_lookup_dict[fi] = (stimulus, row.frame)
 
 
-        for fi in range(min(stimulus_lookup_dict.keys())):
-            stimulus_lookup_dict[fi] = ('spontaneous', 0)
-
-        for fi in np.arange(1+max(stimulus_lookup_dict.keys()), 1+self.number_of_acquisition_frames):
-            stimulus_lookup_dict[fi] = ('spontaneous', 0)
+        # for fi in range(min(stimulus_lookup_dict.keys())):
+        #     stimulus_lookup_dict[fi] = ('spontaneous', 0)
+        #
+        # for fi in np.arange(1+max(stimulus_lookup_dict.keys()), 1+self.number_of_acquisition_frames):
+        #     stimulus_lookup_dict[fi] = ('spontaneous', 0)
 
         self.interval_list = []
         interval_stimulus_dict = {}
@@ -88,9 +94,9 @@ class SessionStimulus(object):
             self.interval_list += stimulus_interval_list
         self.interval_list.sort(key=lambda x: x[0])
 
-        stimulus_signature_list = []
-        duration_signature_list = []
-        interval_signature_list = []
+        stimulus_signature_list = ['gap']
+        duration_signature_list = [self.interval_list[0][0]]
+        interval_signature_list = [(0,self.interval_list[0][0])]
         for ii, interval in enumerate(self.interval_list):
             stimulus_signature_list.append(interval_stimulus_dict[interval])
             duration_signature_list.append(interval[1] - interval[0])
@@ -105,8 +111,15 @@ class SessionStimulus(object):
                                          'duration':duration_signature_list,
                                          'interval':interval_signature_list})
 
-        for (ii, curr_row_template), (jj, curr_row), in zip(session_signature_df_dict[self.session_type].iterrows(), self.interval_df.iterrows()):
-            assert ii == jj
+        stimulus_signature_list.append('gap')
+        interval_signature_list.append((self.interval_list[-1][1], self.number_of_acquisition_frames))
+        duration_signature_list.append(interval_signature_list[-1][1]-interval_signature_list[-1][0])
+
+        # print time.time() - t0
+
+        for (ii, curr_row_template), (jj, curr_row), in zip(session_signature_df_dict[self.session_type].iterrows(), self.interval_df.head(len(self.interval_df)-1).tail(len(self.interval_df)-2).iterrows()):
+            # print ii, jj
+            assert ii == jj - 1
             assert curr_row_template.stimulus == curr_row.stimulus
             assert float((curr_row_template.duration - curr_row.duration))/curr_row_template.duration < 1e-2
             assert curr_row.duration == curr_row.interval[1] - curr_row.interval[0]
@@ -150,3 +163,8 @@ class SessionStimulus(object):
 if __name__ == "__main__":
 
     S = SessionStimulus(oeid=530646083)
+    print S.interval_df
+    # t0 = time.time()
+    # S.get_stimulus_lookup_dict()
+    # print time.time() - t0
+    # print S.number_of_acquisition_frames
