@@ -16,7 +16,7 @@ def test_cache():
     import os
 
 
-    @cacheable(query_strategy='lazy', **get_cache_array_sparse_h5_reader_writer())
+    @cacheable(strategy='lazy', **get_cache_array_sparse_h5_reader_writer())
     def f():
         np.random.seed(0)
         data = np.random.rand(3, 3, 3)

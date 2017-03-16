@@ -43,7 +43,7 @@ class Session(object):
 
 
     @staticmethod
-    @cacheable(query_strategy='lazy', **get_cache_array_numpy_memmap())
+    @cacheable(strategy='lazy', **get_cache_array_numpy_memmap())
     def get_dff_array_cache(brain_observatory_nwb_data_set):
         return brain_observatory_nwb_data_set.get_dff_traces()[1]
 

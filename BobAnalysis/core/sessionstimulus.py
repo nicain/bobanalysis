@@ -61,15 +61,15 @@ class SessionStimulus(object):
     def initialize_interval_df(self):
         self.interval_df = self.get_interval_df(path=os.path.join(cache_location, str(self.oeid), 'interval_df.csv'))
 
-    @cacheable(query_strategy='lazy', writer=lambda p, x : x.to_csv(p), reader=pd.DataFrame.from_csv)
+    @cacheable(strategy='lazy', writer=lambda p, x : x.to_csv(p), reader=pd.DataFrame.from_csv)
     def get_interval_df(self):
-        self.get_stimulus_lookup_dict(query_strategy='create')
+        self.get_stimulus_lookup_dict(strategy='create')
         return self.interval_df
 
     def initialize_stimulus_lookup_dict(self):
         self.stimulus_lookup_dict = self.get_stimulus_lookup_dict(path=os.path.join(cache_location, str(self.oeid), 'session_stimulus.json'))
 
-    @cacheable(query_strategy='lazy', **Cache.cache_json())
+    @cacheable(strategy='lazy', **Cache.cache_json())
     def get_stimulus_lookup_dict(self):
 
         stimulus_lookup_dict = {}

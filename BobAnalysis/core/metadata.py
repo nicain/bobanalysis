@@ -10,7 +10,7 @@ from BobAnalysis.core.utilities import memoize
 import os
 
 
-@cacheable(query_strategy='lazy', **Cache.cache_json())
+@cacheable(strategy='lazy', **Cache.cache_json())
 def get_csid_to_oeid_dict():
     csid_oeid_dict = {}
     manifest_file = os.path.join(cache_location, 'boc_manifest.json')
@@ -27,7 +27,7 @@ csid_oeid_dict = get_csid_to_oeid_dict(path=os.path.join(cache_location, 'csid_o
 def csid_to_oeid(csid):
     return csid_oeid_dict[str(csid)]
 
-@cacheable(query_strategy='lazy', **Cache.cache_json())
+@cacheable(strategy='lazy', **Cache.cache_json())
 def get_oeid_index_to_csid_dict():
     oeid_index_to_csid_dict = {}
     manifest_file = os.path.join(cache_location, 'boc_manifest.json')
@@ -46,7 +46,7 @@ oeid_index_to_csid_dict = get_oeid_index_to_csid_dict(path=os.path.join(cache_lo
 def oeid_index_to_csid(oeid, index):
     return oeid_index_to_csid_dict[str((oeid, index))]
 
-@cacheable(query_strategy='lazy', **Cache.cache_json())
+@cacheable(strategy='lazy', **Cache.cache_json())
 def get_oeid_csid_to_index_dict():
     oeid_csid_to_index_dict = {}
     manifest_file = os.path.join(cache_location, 'boc_manifest.json')
