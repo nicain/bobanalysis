@@ -75,7 +75,7 @@ class ROI(object):
         self.center = tuple(map(lambda x: round(x,1), (self.mask_sparse[0].mean(), self.mask_sparse[1].mean())))
 
     @staticmethod
-    @cacheable(query_strategy='lazy', **get_cache_array_sparse_h5_reader_writer())
+    @cacheable(strategy='lazy', **get_cache_array_sparse_h5_reader_writer())
     def get_roi_mask_array_cache(brain_observatory_nwb_data_set):
         return brain_observatory_nwb_data_set.get_roi_mask_array()
 
